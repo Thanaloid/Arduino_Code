@@ -2,6 +2,9 @@
 #define BAUDRATE 57600
 #define DEBUGOUTPUT 0
 
+//成形した値を保持するための変数
+int outValue[4]; 
+
 //チェックサム変数を確認
 int   generatedChecksum = 0;
 byte  checksum = 0; 
@@ -18,7 +21,10 @@ byte LowBeta = 0;   //Lowベータ波(LowBeta)
 //初期化
 void setup() 
 {
-  Serial.begin(BAUDRATE); 
+  Serial.begin(BAUDRATE);
+    for(int i = 0; i < 4; i++){ //for文（カッコ内の終了条件を満たすまで、中カッコ内の処理を繰り返す）
+    outValue[i] = 0;    //成形した値も初期化（0を入れる）
+    } 
 }
 
 //シリアルポートから１バイトのデータを読み込む
@@ -51,7 +57,9 @@ void read_serial_data()
           }         
           checksum = ReadOneByte();//チェックバイトを読み取る
           //チェック
-          generatedChecksum = (~generatedChecksum)&0xff;       
+          generatedChecksum = (~generatedChecksum)&0xff; 
+
+          
           //チェックバイトを比較する
           if(checksum == generatedChecksum)//データを正しく受信し、処理を続行する
           {    
@@ -61,18 +69,19 @@ void read_serial_data()
             Theta = payloadData[8];//シータ波の値      
             LowAlpha = payloadData[11];//Lowアルファ波の値
             LowBeta = payloadData[17];//Lowベータ波の値
+            //10bitのアナログ値を0-255までの値に変換
+          outValue[0] = map(Theta,  0, 511, 0, 255);
+          outValue[1] = map(LowAlpha,0, 511, 0, 255); 
+          outValue[2] = map(LowBeta, 0, 511, 0, 255); 
             #if !DEBUGOUTPUT         
             //シータ波の値をプリントする
-            Serial.print("Theta: ");
-            Serial.print(Theta, DEC);
+            Serial.print(outValue[0]);
+            Serial.print("  ");
             //Lowアルファ波の値をプリントする
-            Serial.print("LowAlpha: ");
-            Serial.print(LowAlpha, DEC);
+            Serial.print(outValue[1]);
+             Serial.print("  ");
             //Lowベータ波の値をプリントする
-            Serial.print("LowBeta: ");
-            Serial.print(LowBeta, DEC);
-            //println
-            Serial.print("\n");       
+            Serial.println(outValue[2]);      
             #endif              
           } 
         } 
