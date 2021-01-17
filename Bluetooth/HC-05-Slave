@@ -1,7 +1,8 @@
+//Arduinoのメインプログラムに書き込んでください
 #include <Servo.h>
 #include <SoftwareSerial.h>
 Servo servo;
-#define BAUDRATE 57600
+#define BAUDRATE 57600　//bit/sは57600に変更する
 #define DEBUGOUTPUT 0
 
 
