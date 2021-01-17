@@ -1,0 +1,23 @@
+#include <Servo.h>
+#include <SoftwareSerial.h>
+Servo servo;
+#define BAUDRATE 57600
+#define DEBUGOUTPUT 0
+
+
+SoftwareSerial Bluetooth(10, 11);
+
+void setup() 
+{
+
+Serial.begin(BAUDRATE) ;// シリアルモニターの初期化をする
+ Bluetooth.begin(57600);
+}
+
+void loop() {
+
+ Bluetooth.write(byte(data));//転送されたいデータ
+
+ delay(1000);
+
+}
