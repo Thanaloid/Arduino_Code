@@ -1,0 +1,27 @@
+#include <SoftwareSerial.h>
+#include <Servo.h>
+SoftwareSerial Bluetooth(10, 11);
+int rotateX;
+int rotateY;
+String val = "";
+void setup() 
+{
+  Serial.begin(57600);
+  Bluetooth.begin(57600);
+}
+
+void loop()
+{
+
+    while(Bluetooth.available() >0)
+    {
+       val +=Bluetooth.read();
+       delay(2);
+    }
+    if(val.length() >0)
+    {
+      Serial.println(val);
+      val = "";
+
+ }
+}
