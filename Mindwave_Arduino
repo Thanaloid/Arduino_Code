@@ -1,96 +1,101 @@
 
-#define BAUDRATE 57600
-#define DEBUGOUTPUT 0
+ #define BAUDRATE 57600
+ #define DEBUGOUTPUT 0
 
-//成形した値を保持するための変数
-int outValue[4]; 
+ //チェックサム変数を確認
+ int   generatedChecksum = 0;
+ byte  checksum = 0; 
 
-//チェックサム変数を確認
-int   generatedChecksum = 0;
-byte  checksum = 0; 
+ //受信データの長さ
+ byte  payloadLength = 0;
+ byte  payloadData[32] = {0};//合計32個データを受信する
 
-//受信データの長さ
-byte  payloadLength = 0;
-byte  payloadData[32] = {0};//合計32個データを受信する
+ //読み取りたい変数
+ byte Delta = 0;
+ byte Theta = 0;//シータ波(theat)
+ byte LowAlpha = 0;    //Lowアルファ波(LowAlpha) 
+ byte HighAlpha = 0;
+ byte LowBeta = 0;   //Lowベータ波(LowBeta)
+ byte HighBeta = 0;
+ byte LowGamma = 0;
+ byte MidGamma = 0;
 
-//読み取りたい変数
-byte Theta = 0;//シータ波(theat)
-byte LowAlpha = 0;    //Lowアルファ波(LowAlpha) 
-byte LowBeta = 0;   //Lowベータ波(LowBeta)
+ //初期化
+ void setup() 
+ {
+   Serial.begin(BAUDRATE); 
+ }
 
-//初期化
-void setup() 
-{
-  Serial.begin(BAUDRATE);
-    for(int i = 0; i < 4; i++){ //for文（カッコ内の終了条件を満たすまで、中カッコ内の処理を繰り返す）
-    outValue[i] = 0;    //成形した値も初期化（0を入れる）
-    } 
-}
+ //シリアルポートから１バイトのデータを読み込む
+ byte ReadOneByte() 
+ {
+   int ByteRead;
+   while(!Serial.available());
+   ByteRead = Serial.read();
+   return ByteRead;//読み取ったバイトを返す
+ }
 
-//シリアルポートから１バイトのデータを読み込む
-byte ReadOneByte() 
-{
-  int ByteRead;
-  while(!Serial.available());
-  ByteRead = Serial.read();
-  return ByteRead;//読み取ったバイトを返す
-}
+ //シリアルデータを読み取る
+ void read_serial_data()
+ {
+     //同期バイトを探す
+     if(ReadOneByte() == 0xAA)//バイト１を読み取る
+     {
+       if(ReadOneByte() == 0xAA)//バイト２を読み取る
+       {
+         payloadLength = ReadOneByte();//バイト３を読み取る（パケットの長さ）
+         if(payloadLength == 0x20)
+         //受信したデータが大きなパケットの場合、読み取りは続行され、
+         //小さなパケットは破棄されて読み取られない
+         {
+           generatedChecksum = 0; 
+           for(int i = 0; i < payloadLength; i++)//32位のバイトを連続して読み取る
+           {  
+             payloadData[i] = ReadOneByte();//指定された長さのパケットのデータを読み取る
+             generatedChecksum += payloadData[i];
+           }         
+           checksum = ReadOneByte();//チェックバイトを読み取る
+           //チェック
+           generatedChecksum = (~generatedChecksum)&0xff;       
+           //チェックバイトを比較する
+           if(checksum == generatedChecksum)//データを正しく受信し、処理を続行する
+           {    
+             Theta = 0;
+             LowAlpha = 0;  
+             //赋值数据
+             Delta = payloadData[5];//デルタ波の値
+             Theta = payloadData[8];//シータ波の値      
+             LowAlpha = payloadData[11];//Lowアルファ波の値
+             HighAlpha = payloadData[14];//Highアルファ波の値
+             LowBeta = payloadData[17];//Lowベータ波の値
+             HighBeta = payloadData[20];//Highベータ波の値
+             LowGamma = payloadData[23];//Lowガンマ波の値
+             MidGamma = payloadData[26];//Midガンマ波の値
+             
+             #if !DEBUGOUTPUT         
+             //シータ波の値をプリントする
+             Serial.write(analogRead(Delta));
+             Serial.write(analogRead(Theta));
+             Serial.write(analogRead(LowAlpha));
+             Serial.write(analogRead(HighAlpha));
+             Serial.write(analogRead(LowBeta));
+             Serial.write(analogRead(HighBeta));
+             Serial.write(analogRead(LowGamma));
+             Serial.write(analogRead(MidGamma));
 
-//シリアルデータを読み取る
-void read_serial_data()
-{
-    //同期バイトを探す
-    if(ReadOneByte() == 0xAA)//バイト１を読み取る
-    {
-      if(ReadOneByte() == 0xAA)//バイト２を読み取る
-      {
-        payloadLength = ReadOneByte();//バイト３を読み取る（パケットの長さ）
-        if(payloadLength == 0x20)
-        //受信したデータが大きなパケットの場合、読み取りは続行され、
-        //小さなパケットは破棄されて読み取られない
-        {
-          generatedChecksum = 0; 
-          for(int i = 0; i < payloadLength; i++)//32位のバイトを連続して読み取る
-          {  
-            payloadData[i] = ReadOneByte();//指定された長さのパケットのデータを読み取る
-            generatedChecksum += payloadData[i];
-          }         
-          checksum = ReadOneByte();//チェックバイトを読み取る
-          //チェック
-          generatedChecksum = (~generatedChecksum)&0xff; 
+             //Serial.print(LowBeta);
+             //println
+             Serial.print("\n");
+     
+             #endif              
+           } 
+         } 
+       }
+     }
+ }
 
-          
-          //チェックバイトを比較する
-          if(checksum == generatedChecksum)//データを正しく受信し、処理を続行する
-          {    
-            Theta = 0;
-            LowAlpha = 0;  
-            //赋值数据
-            Theta = payloadData[8];//シータ波の値      
-            LowAlpha = payloadData[11];//Lowアルファ波の値
-            LowBeta = payloadData[17];//Lowベータ波の値
-            //10bitのアナログ値を0-255までの値に変換
-          outValue[0] = map(Theta,  0, 511, 0, 255);
-          outValue[1] = map(LowAlpha,0, 511, 0, 255); 
-          outValue[2] = map(LowBeta, 0, 511, 0, 255); 
-            #if !DEBUGOUTPUT         
-            //シータ波の値をプリントする
-            Serial.print(outValue[0]);
-            Serial.print("  ");
-            //Lowアルファ波の値をプリントする
-            Serial.print(outValue[1]);
-             Serial.print("  ");
-            //Lowベータ波の値をプリントする
-            Serial.println(outValue[2]);      
-            #endif              
-          } 
-        } 
-      }
-    }
-}
-
-//Main Loop
-void loop() 
-{
-  read_serial_data();//シリアルデータを読み込む
-}
+ //Main Loop
+ void loop() 
+ {
+   read_serial_data();//シリアルデータを読み込む
+ }
