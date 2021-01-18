@@ -1,0 +1,31 @@
+/*
+  *Configuration through AT Commands for HC-05
+  *Commands:
+  *   AT     //测试指令
+  *   AT+ORGL　//工場出荷時状態に戻す
+  *   AT+UART=57600,0,0  //返回蓝牙波特率
+  *   AT+ROLE=0　//子機モードに設定
+  *   AT+ADDR?　//アドレス確認//14,3,50cde
+  *   AT+CMODE=1　//接続先を限定しない
+  *   AT+RESET  //模块复位（重启）
+  *   
+
+*/
+
+#include <SoftwareSerial.h>
+SoftwareSerial BT(10,11); //10→Blue, 11→Green
+ 
+void setup(){
+  BT.begin(38400);
+  Serial.begin(38400);
+}
+ 
+void loop(){
+  if( BT.available() ){
+    Serial.write( BT.read() );
+  }
+ 
+  if( Serial.available() ){
+     BT.write( Serial.read() );
+  }
+}
