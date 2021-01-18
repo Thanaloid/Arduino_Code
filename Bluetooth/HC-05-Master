@@ -4,6 +4,7 @@ SoftwareSerial Bluetooth(10, 11);
 int rotateX;
 int rotateY;
 String val = "";
+
 void setup() 
 {
   Serial.begin(57600);
