@@ -1,1 +1,34 @@
+/*
+  *Configuration through AT Commands for HC-05
+  *Commands:
+  *   AT     //测试指令
+  *   AT+ORGL　//工場出荷時状態に戻す
+  *   AT+UART=57600,0,0  //通信速度の設定
+  *   AT+ROLE=1  //親機モードに設定
+  *   AT+PSWD=0000 //设置配对密码为0000
+  *   AT+CMODE=0   //指定蓝牙地址链接模式
+  *   AT+BIND=14,3,50cde  //绑定蓝牙地址
+  *   AT+PAIR=14,3,50cde  //
+  *   AT+LINK=14,3,50cde  //
 
+  *   
+
+*/
+
+#include <SoftwareSerial.h>
+SoftwareSerial BT(10,11); //10→Blue, 11→Green
+ 
+void setup(){
+  BT.begin(38400);
+  Serial.begin(38400);
+}
+ 
+void loop(){
+  if( BT.available() ){
+    Serial.write( BT.read() );
+  }
+ 
+  if( Serial.available() ){
+     BT.write( Serial.read() );
+  }
+}
