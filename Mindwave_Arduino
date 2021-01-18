@@ -12,10 +12,10 @@
 
  //読み取りたい変数
  byte Delta = 0;
- byte Theta = 0;//シータ波(theat)
- byte LowAlpha = 0;    //Lowアルファ波(LowAlpha) 
+ byte Theta = 0;
+ byte LowAlpha = 0;    
  byte HighAlpha = 0;
- byte LowBeta = 0;   //Lowベータ波(LowBeta)
+ byte LowBeta = 0;   
  byte HighBeta = 0;
  byte LowGamma = 0;
  byte MidGamma = 0;
