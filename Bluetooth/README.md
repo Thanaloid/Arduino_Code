@@ -1,2 +1,3 @@
+# 回路図
 
-![circuit]circuit.jpg
+![image](https://github.com/Thanaloid/Arduino_Code/blob/main/Bluetooth/circuit.jpg)
